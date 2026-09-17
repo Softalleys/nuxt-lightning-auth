@@ -8,14 +8,17 @@ import {
 let recoveryPromise: Promise<void> | null = null
 
 export function useAuthRecovery() {
-  const route = useRoute()
   const { clear } = useUserSession()
+
+  // Read lazily: this composable is also created inside route middleware, where
+  // useRoute() still points at the route being left.
+  const currentPath = () => useNuxtApp().$router.currentRoute.value.fullPath
 
   /**
    * Runs at most once per episode: a second failing request during the same
    * redirect must not start a competing login.
    */
-  async function recoverAuthentication(requestedPath = route.fullPath): Promise<void> {
+  async function recoverAuthentication(requestedPath?: string): Promise<void> {
     if (import.meta.server)
       return
     if (recoveryPromise)
@@ -25,7 +28,10 @@ export function useAuthRecovery() {
     if (!claimAuthRecovery(window.sessionStorage))
       return
 
-    const returnPath = resolveInternalReturnPath(requestedPath, window.location.origin)
+    const returnPath = resolveInternalReturnPath(
+      requestedPath ?? currentPath(),
+      window.location.origin
+    )
     recoveryPromise = (async () => {
       try {
         await clear()
