@@ -75,7 +75,9 @@ While the repository is not published yet, both applications keep a copy under
 `layers/lightning-auth` and select it with:
 
 ```ts
-extends: [process.env.NUXT_LIGHTNING_AUTH_LAYER ?? './layers/lightning-auth']
+export default defineNuxtConfig({
+  extends: [process.env.NUXT_LIGHTNING_AUTH_LAYER ?? './layers/lightning-auth']
+})
 ```
 
 Set `NUXT_LIGHTNING_AUTH_LAYER` to the git reference at build time and delete
