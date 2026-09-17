@@ -1,10 +1,21 @@
+import { createResolver } from '@nuxt/kit'
 import { AUTH_SESSION_ABSOLUTE_MAX_AGE_SECONDS } from './utils/auth-errors'
 
-export default defineNuxtConfig({
-  // Keeps the Nuxt 3 directory shape when the layer is consumed by a Nuxt 4 app.
-  srcDir: '.',
+const { resolve } = createResolver(import.meta.url)
 
+// No `srcDir`: Nuxt 3 defaults it to the layer root, and Nuxt 4 falls back to
+// the layer root when no `app/` exists. Declaring it would override the
+// consuming Nuxt 4 application's own `app/` srcDir.
+export default defineNuxtConfig({
   modules: ['nuxt-auth-utils'],
+
+  hooks: {
+    // Nuxt 4 includes only `layers/*/*.d.ts`, so the session augmentation has
+    // to be referenced by path to reach the consuming application.
+    'prepare:types': ({ references }) => {
+      references.push({ path: resolve('types/auth-utils.d.ts') })
+    }
+  },
 
   runtimeConfig: {
     oidc: {

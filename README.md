@@ -4,8 +4,10 @@ A Nuxt layer that makes an application a Lightning OIDC relying party. The
 browser never receives a token: Nitro owns the session, refreshes the access
 token on demand and proxies every call to the protected API.
 
-Runs on Nuxt 3 and Nuxt 4. The layer sets `srcDir: '.'` so its directories are
-scanned the same way in both.
+Runs on Nuxt 3 and Nuxt 4. It deliberately declares no `srcDir`: Nuxt 3
+defaults it to the layer root and Nuxt 4 falls back to the layer root when the
+layer has no `app/` directory, so declaring one would override the consuming
+application's own source directory.
 
 ## What it provides
 
@@ -37,6 +39,7 @@ environment variables at run time.
 | `oidc.proxyUpstream` | `NUXT_OIDC_PROXY_UPSTREAM` | Base URL that `/backend/**` forwards to. |
 | `oidc.appUrl` | `NUXT_OIDC_APP_URL` | Public origin, used to build redirect URIs behind a proxy. |
 | `oidc.loginPath` / `oidc.postLogoutPath` | — | Defaults `/login`. |
+| `oidc.scope` | `NUXT_OIDC_SCOPE` | Set it explicitly to what the Lightning application is configured for. |
 | `session.password` | `NUXT_SESSION_PASSWORD` | At least 32 characters. Seals the session cookie. |
 
 Register these redirect URIs on the Lightning application: `/api/auth/callback`,
