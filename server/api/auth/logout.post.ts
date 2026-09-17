@@ -13,7 +13,7 @@ export default defineEventHandler(async (event): Promise<LogoutResponse> => {
   const origin = getHeader(event, 'origin')
   const requestOrigin = getRequestURL(event, { xForwardedHost: true, xForwardedProto: true }).origin
   if (origin && origin !== requestOrigin)
-    throw createError({ statusCode: 403, statusMessage: 'Cross-origin logout is not allowed.' })
+    throw createError({ statusCode: 403, message: 'Cross-origin logout is not allowed.' })
 
   const config = readLightningAuthConfig(event)
   const session = await getUserSession(event) as {

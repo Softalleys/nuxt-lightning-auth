@@ -5,7 +5,7 @@ import { readLightningAuthConfig } from '../../utils/oidc'
 export default defineEventHandler(async (event) => {
   const { proxyUpstream } = readLightningAuthConfig(event)
   if (!proxyUpstream)
-    throw createError({ statusCode: 500, statusMessage: 'The proxy upstream is not configured.' })
+    throw createError({ statusCode: 500, message: 'The proxy upstream is not configured.' })
 
   const accessToken = await requireAccessToken(event)
   const path = event.path.replace(/^\/backend/, '')

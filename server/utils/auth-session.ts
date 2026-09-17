@@ -35,13 +35,13 @@ export interface TenantContext {
 }
 
 function unauthorized(code: string, message: string) {
-  return createError({ statusCode: 401, statusMessage: message, data: { code } })
+  return createError({ statusCode: 401, message, data: { code } })
 }
 
 function refreshUnavailable() {
   return createError({
     statusCode: 503,
-    statusMessage: 'Authentication service is temporarily unavailable.',
+    message: 'Authentication service is temporarily unavailable.',
     data: { code: AUTH_RESPONSE_CODES.refreshUnavailable }
   })
 }

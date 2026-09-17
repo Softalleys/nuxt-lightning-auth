@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   if (!resourceUrl) {
     throw createError({
       statusCode: 502,
-      statusMessage: 'The access token does not carry a trusted entitlements resource.'
+      message: 'The access token does not carry a trusted entitlements resource.'
     })
   }
 
