@@ -31,6 +31,8 @@ export default defineNuxtConfig({
     },
 
     session: {
+      // nuxt-auth-utils owns this value; naming it keeps the config typed.
+      password: process.env.NUXT_SESSION_PASSWORD ?? '',
       name: 'lightning-auth.session',
       maxAge: AUTH_SESSION_ABSOLUTE_MAX_AGE_SECONDS,
       cookie: {
