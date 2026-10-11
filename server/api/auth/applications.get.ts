@@ -3,7 +3,7 @@ import { requireAccessToken } from '../../utils/auth-session'
 import { readLightningAuthConfig } from '../../utils/oidc'
 import { resolveTokenResourceUrl } from '../../utils/token-resource'
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async (event): Promise<unknown> => {
   const config = readLightningAuthConfig(event)
   const accessToken = await requireAccessToken(event)
   const session = await getUserSession(event) as { secure?: { applicationsUrl?: string } }
@@ -16,7 +16,7 @@ export default defineEventHandler(async (event) => {
   if (!resourceUrl)
     return { value: [] }
 
-  return $fetch(resourceUrl, {
+  return $fetch<unknown>(resourceUrl, {
     headers: { Accept: 'application/json', Authorization: `Bearer ${accessToken}` }
   })
 })

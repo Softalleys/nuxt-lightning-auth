@@ -1,3 +1,4 @@
+import type { $Fetch as NitroFetch, NitroFetchRequest } from 'nitropack/types'
 import type { $Fetch, FetchOptions, FetchResponse } from 'ofetch'
 
 export type ApiFetchOptions = FetchOptions<any> & { responseType?: any }
@@ -21,11 +22,14 @@ export interface ApiFetchInstance {
  * Keeps the `$get`/`get` call shape the application already uses so moving the
  * transport to the Nitro proxy does not touch every caller.
  */
-export function createApiFetchInstance(client: $Fetch): ApiFetchInstance {
+export function createApiFetchInstance(client: NitroFetch<unknown, NitroFetchRequest>): ApiFetchInstance {
+  // Every URL here is a runtime string, so Nitro's route inference has nothing to
+  // match and only costs compile time.
+  const fetchClient = client as unknown as $Fetch
   const data = (method: string) =>
-    (url: string, options: ApiFetchOptions = {}) => client(url, { ...options, method } as any)
+    (url: string, options: ApiFetchOptions = {}) => fetchClient(url, { ...options, method } as any)
   const raw = (method: string) =>
-    (url: string, options: ApiFetchOptions = {}) => client.raw(url, { ...options, method } as any)
+    (url: string, options: ApiFetchOptions = {}) => fetchClient.raw(url, { ...options, method } as any)
 
   return {
     $get: data('GET'),
@@ -38,7 +42,7 @@ export function createApiFetchInstance(client: $Fetch): ApiFetchInstance {
     put: raw('PUT'),
     patch: raw('PATCH'),
     delete: raw('DELETE'),
-    request: (url, options = {}) => client(url, options as any),
-    raw: (url, options = {}) => client.raw(url, options as any)
+    request: (url, options = {}) => fetchClient(url, options as any),
+    raw: (url, options = {}) => fetchClient.raw(url, options as any)
   }
 }

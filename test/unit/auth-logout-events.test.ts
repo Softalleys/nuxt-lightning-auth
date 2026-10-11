@@ -1,3 +1,4 @@
+import type { AuthLogoutEvent } from '../../utils/auth-logout-events'
 import { describe, expect, it } from 'vitest'
 import {
   AUTH_LOGOUT_GUARD_KEY,
@@ -9,7 +10,7 @@ import {
   parseAuthLogoutEvent
 } from '../../utils/auth-logout-events'
 
-const VALID = {
+const VALID: AuthLogoutEvent = {
   version: 1,
   type: 'logout-committed',
   eventId: 'event-1',

@@ -1,4 +1,4 @@
-import type { H3Event, Session } from 'h3'
+import type { H3Event, SessionManager } from 'h3'
 import { getRequestURL, useSession } from 'h3'
 import { resolveInternalReturnPath } from '../../utils/auth-recovery-state'
 import { isSecureRequest, readSessionPassword } from './logout-tombstone'
@@ -13,7 +13,7 @@ export interface AuthFlowState extends Record<string, unknown> {
 const FLOW_COOKIE = 'lightning-auth.flow'
 const FLOW_MAX_AGE_SECONDS = 600
 
-export function useAuthFlowSession(event: H3Event): Promise<Session<AuthFlowState>> {
+export function useAuthFlowSession(event: H3Event): Promise<SessionManager<AuthFlowState>> {
   return useSession<AuthFlowState>(event, {
     name: FLOW_COOKIE,
     password: readSessionPassword(event),
