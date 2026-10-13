@@ -148,7 +148,8 @@ describe('authorization code flow', () => {
 
     expect(session.user.sub).toBe('user-1')
     expect(session.user.tenant).toBe('rx_test01')
-    expect(session.user.entitlements).toContain('urn:activagt:telematic:self-service')
+    expect(session.user).not.toHaveProperty('entitlements')
+    expect(session.user).not.toHaveProperty('roles')
     expect(session.user.impersonated).toBe(false)
     expect(session.secure.accessToken).toBeTruthy()
     expect(session.secure.refreshToken).toBeTruthy()

@@ -11,8 +11,9 @@ import {
 } from '../../utils/auth-errors'
 import { isTombstoned, readSessionPassword } from './logout-tombstone'
 import { readLightningAuthConfig } from './oidc'
-import { decodeTokenClaims, readStringArrayClaim, readStringClaim } from './token-claims'
+import { decodeTokenClaims, readStringClaim } from './token-claims'
 import { refreshAccessTokenSingleFlight, TokenRefreshError } from './token-refresh'
+import { resolveTokenResourceUrl } from './token-resource'
 
 export interface AuthSecureSession {
   accessToken?: string
@@ -30,7 +31,6 @@ export interface TenantContext {
   subject: string
   tenantIdentifier: string | null
   tenantId: string | null
-  entitlements: string[]
   impersonated: boolean
 }
 
@@ -155,10 +155,6 @@ async function refreshSessionTokens(
   }
 }
 
-/**
- * Lightning puts the entitlement list in the ID token and only a resource URL
- * in the access token, so the list is read from the session captured at login.
- */
 export async function requireTenantContext(event: H3Event): Promise<TenantContext> {
   const accessToken = await requireAccessToken(event)
   const claims = decodeTokenClaims(accessToken)
@@ -166,13 +162,33 @@ export async function requireTenantContext(event: H3Event): Promise<TenantContex
   if (!subject)
     throw unauthorized(AUTH_RESPONSE_CODES.accessTokenUnavailable, 'The access token has no subject.')
 
-  const session = await getUserSession(event) as { user?: { entitlements?: unknown } }
-
   return {
     subject,
     tenantIdentifier: readStringClaim(claims, 'tenant'),
     tenantId: readStringClaim(claims, 'tid'),
-    entitlements: readStringArrayClaim(session.user as any, 'entitlements'),
     impersonated: Boolean(readStringClaim(claims, 'puppeteer'))
   }
+}
+
+/**
+ * Entitlements are read from Lightning on demand, never kept in the session:
+ * the list grows with every permission a role carries and would push the
+ * sealed cookie past the browser's 4 KB limit.
+ */
+export async function readEntitlements(event: H3Event): Promise<unknown> {
+  const config = readLightningAuthConfig(event)
+  const accessToken = await requireAccessToken(event)
+  const session = await getUserSession(event) as { secure?: AuthSecureSession }
+  const resourceUrl = resolveTokenResourceUrl(session.secure?.entitlementsUrl, config.issuer, 'entitlements')
+
+  if (!resourceUrl) {
+    throw createError({
+      statusCode: 502,
+      message: 'The access token does not carry a trusted entitlements resource.'
+    })
+  }
+
+  return $fetch<unknown>(resourceUrl, {
+    headers: { Accept: 'application/json', Authorization: `Bearer ${accessToken}` }
+  })
 }

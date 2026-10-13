@@ -1,10 +1,11 @@
+import { Buffer } from 'node:buffer'
 import { defineEventHandler, getQuery, getRequestURL, sendRedirect, setCookie } from 'h3'
 import * as client from 'openid-client'
 import { OIDC_ERROR_COOKIE } from '../../../utils/oidc-error-cookie'
 import { resolveApplicationOrigin, useAuthFlowSession } from '../../utils/auth-flow'
 import { createSessionFingerprint, isSecureRequest } from '../../utils/logout-tombstone'
 import { getOidcConfiguration, readLightningAuthConfig } from '../../utils/oidc'
-import { decodeTokenClaims, readStringArrayClaim, readStringClaim } from '../../utils/token-claims'
+import { decodeTokenClaims, readStringClaim } from '../../utils/token-claims'
 
 function captureError(event: any, error: string, errorUri: unknown, issuer: string): void {
   let sanitizedUri: string | undefined
@@ -25,6 +26,17 @@ function captureError(event: any, error: string, errorUri: unknown, issuer: stri
     path: '/',
     maxAge: 120
   })
+}
+
+const MAX_COOKIE_BYTES = 4096
+
+function sessionCookieBytes(event: any): number {
+  const name = `${(useRuntimeConfig(event).session as { name?: string }).name}=`
+  const header = event.node.res.getHeader('set-cookie')
+  const cookie = (Array.isArray(header) ? header : [header])
+    .find((value): value is string => typeof value === 'string' && value.startsWith(name))
+
+  return cookie ? Buffer.byteLength(cookie.split(';', 1)[0]!) : 0
 }
 
 export default defineEventHandler(async (event) => {
@@ -87,8 +99,6 @@ export default defineEventHandler(async (event) => {
       tenantId: readStringClaim(accessClaims, 'tid'),
       tenantName: readStringClaim(idClaims, 'tenant_name'),
       tenantPicture: readStringClaim(idClaims, 'tenant_picture'),
-      roles: readStringArrayClaim(idClaims, 'roles'),
-      entitlements: readStringArrayClaim(idClaims, 'entitlements'),
       impersonated: Boolean(readStringClaim(idClaims, 'puppeteer'))
     },
     fingerprint: sid ? createSessionFingerprint(config.issuer, sid) : undefined,
@@ -104,6 +114,16 @@ export default defineEventHandler(async (event) => {
     },
     error: undefined
   } as any)
+
+  // A browser drops a cookie over 4 KB without a word, which shows up as a
+  // login loop; failing here names the cause instead.
+  const sessionCookie = sessionCookieBytes(event)
+  if (sessionCookie > MAX_COOKIE_BYTES) {
+    console.log('[AUTH] The session cookie exceeds the browser limit', { bytes: sessionCookie })
+    await clearUserSession(event)
+    captureError(event, 'session_too_large', undefined, config.issuer)
+    return sendRedirect(event, config.loginPath, 302)
+  }
 
   return sendRedirect(event, returnPath || '/', 302)
 })

@@ -9,8 +9,6 @@ declare module '#auth-utils' {
     tenantId: string | null
     tenantName: string | null
     tenantPicture: string | null
-    roles: string[]
-    entitlements: string[]
     impersonated: boolean
   }
 
