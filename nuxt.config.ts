@@ -40,7 +40,9 @@ export default defineNuxtConfig({
       maxAge: AUTH_SESSION_ABSOLUTE_MAX_AGE_SECONDS,
       cookie: {
         sameSite: 'lax',
-        path: '/'
+        path: '/',
+        // Browsers drop a Secure cookie on a plain-HTTP origin other than localhost.
+        secure: process.env.NUXT_SESSION_COOKIE_SECURE !== 'false'
       }
     }
   }

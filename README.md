@@ -10,7 +10,7 @@ Works with Nuxt 3.17+ and Nuxt 4. Coming from another auth module: see
 ## Install
 
 ```bash
-npm install github:Softalleys/nuxt-lightning-auth#v1.0.0
+npm install github:Softalleys/nuxt-lightning-auth#v1.1.0
 ```
 
 ```ts
@@ -59,6 +59,7 @@ variables at run time.
 | `oidc.scope` | `NUXT_OIDC_SCOPE` | Defaults to the scopes above. |
 | `oidc.loginPath`, `oidc.postLogoutPath` | `NUXT_OIDC_LOGIN_PATH`, `NUXT_OIDC_POST_LOGOUT_PATH` | Default `/login`. |
 | `session.password` | `NUXT_SESSION_PASSWORD` | Seals the session cookie. |
+| `session.cookie.secure` | `NUXT_SESSION_COOKIE_SECURE` | `false` only for a site served over plain HTTP, where the browser drops a Secure cookie. Default `true`. The flow and logout cookies follow the request protocol. |
 
 ## Usage
 
