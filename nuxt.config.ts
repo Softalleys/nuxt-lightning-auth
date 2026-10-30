@@ -10,10 +10,13 @@ export default defineNuxtConfig({
   modules: ['nuxt-auth-utils'],
 
   hooks: {
-    // Nuxt 4 includes only `layers/*/*.d.ts`, so the session augmentation has
-    // to be referenced by path to reach the consuming application.
+    // A layer installed from npm, or under Nuxt 4, has none of its `.d.ts`
+    // files included, so both augmentations are referenced by path.
     'prepare:types': ({ references }) => {
-      references.push({ path: resolve('types/auth-utils.d.ts') })
+      references.push(
+        { path: resolve('types/auth-utils.d.ts') },
+        { path: resolve('types/runtime-config.d.ts') }
+      )
     }
   },
 
