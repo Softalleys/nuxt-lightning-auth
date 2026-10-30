@@ -1,9 +1,13 @@
 {
-  "name": "nuxt-lightning-auth",
-  "version": "0.1.0",
+  "name": "@softalleys/nuxt-lightning-auth",
+  "version": "1.0.0",
   "description": "Nuxt layer implementing the Lightning OIDC relying party: server-side session, tenant API proxy and logout channels.",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Softalleys/nuxt-lightning-auth.git"
+  },
   "main": "./nuxt.config.ts",
   "files": [
     "composables",
@@ -11,6 +15,7 @@
     "nuxt.config.ts",
     "plugins",
     "server",
+    "test/fixtures",
     "types",
     "utils"
   ],
@@ -21,19 +26,19 @@
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration"
   },
+  "dependencies": {
+    "nuxt-auth-utils": "^0.5.30",
+    "openid-client": "^6.8.8"
+  },
   "peerDependencies": {
-    "nuxt": "^3.17.0 || ^4.0.0",
-    "nuxt-auth-utils": "^0.5.0",
-    "openid-client": "^6.0.0"
+    "nuxt": "^3.17.0 || ^4.0.0"
   },
   "devDependencies": {
     "@antfu/eslint-config": "9.5.1",
     "@types/node": "24.10.1",
     "eslint": "10.10.0",
-    "h3": "1.16.0",
+    "h3": "1.15.11",
     "jose": "6.2.12",
-    "nuxt-auth-utils": "0.5.30",
-    "openid-client": "6.8.8",
     "typescript": "5.9.3",
     "vitest": "4.1.5"
   }
